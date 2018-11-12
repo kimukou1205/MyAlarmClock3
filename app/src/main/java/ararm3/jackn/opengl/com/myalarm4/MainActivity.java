@@ -1,5 +1,6 @@
 package ararm3.jackn.opengl.com.myalarm4;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.PendingIntent;
@@ -15,6 +16,8 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Switch;
 import android.widget.TimePicker;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -23,11 +26,11 @@ import java.util.Date;
 
 import ararm3.jackn.opengl.com.myalarm4.util.PreferenceUtil;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
     public static final String ALARM_TIME = "alarm_time";
 
     Button button;
-    Switch alarmSwitch;
+    ToggleButton alarmButton;
     Calendar alarmCalendar = Calendar.getInstance();
     PreferenceUtil pref;
 
@@ -35,6 +38,14 @@ public class MainActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Button sendButton = findViewById(R.id.nextButton);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplication(), SubActivity.class);
+                startActivity(intent);
+            }
+        });
         pref = new PreferenceUtil(this);
         setupViews();
         setListeners();
@@ -42,14 +53,14 @@ public class MainActivity extends AppCompatActivity{
 
     private void setupViews() {
         button = (Button) findViewById(R.id.button);
-        alarmSwitch = (Switch) findViewById(R.id.alarm_switch);
+        alarmButton = (ToggleButton) findViewById(R.id.AlarmButton);
 
         long alarmTime = pref.getLong(ALARM_TIME);
         if (alarmTime != 0) {
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DateFormat df = new SimpleDateFormat("yyyy年MM月dd日  HH:mm");
             Date date = new Date(alarmTime);
             button.setText(df.format(date));
-            alarmSwitch.setChecked(true);
+            alarmButton.setChecked(true);
         }
     }
 
@@ -75,9 +86,10 @@ public class MainActivity extends AppCompatActivity{
                                 alarmCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                                 alarmCalendar.set(Calendar.MINUTE, minute);
                                 alarmCalendar.set(Calendar.SECOND, 0);
-                                DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                button.setText(df.format(alarmCalendar.getTime()));
 
+                                DateFormat df = new SimpleDateFormat("yyyy年MM月dd日  HH:mm");
+                                button.setText(df.format(alarmCalendar.getTime()));
+                                Toast.makeText(MainActivity.this, "アラームをセットしました", Toast.LENGTH_LONG).show();
                             }
                         }, hour, minute, true);
                         timePickerDialog.show();
@@ -89,17 +101,22 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
-        alarmSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        alarmButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 if (isChecked) {
                     register(alarmCalendar.getTimeInMillis());
+                    Toast.makeText(MainActivity.this, "アラームをONしました", Toast.LENGTH_LONG).show();
                 } else {
                     unregister();
+                    Toast.makeText(MainActivity.this, "アラームをOFFしました", Toast.LENGTH_LONG).show();
                 }
+
             }
         });
+
     }
+
     // 登録
     private void register(long alarmTimeMillis) {
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -130,4 +147,5 @@ public class MainActivity extends AppCompatActivity{
         // あとからのものが上書きされる
         return PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
+
 }

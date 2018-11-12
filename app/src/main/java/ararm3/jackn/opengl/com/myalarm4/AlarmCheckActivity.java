@@ -12,5 +12,7 @@ public class AlarmCheckActivity extends BroadcastReceiver {
         Intent startActivityIntent = new Intent(context, PlaySoundActivity.class);
         startActivityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(startActivityIntent);
+
     }
+
 }
